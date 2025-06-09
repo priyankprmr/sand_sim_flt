@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show Random;
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -27,12 +28,12 @@ final _screenHeight = 400.0;
 // Size of each cell in the grid (in pixels)
 const int _pixelSize = 4;
 
-// Grid dimension (100 x 100 grid)
-const int _gridDimension = 100;
+final _col = (_screenWidth / _pixelSize).toInt();
+final _row = (_screenHeight / _pixelSize).toInt();
 
 // Function to create a 2D array initialized with 0s
-Grid make2DArray(int col, int row) {
-  return List.generate(col, (_) => List.generate(row, (_) => 0));
+Grid make2DArray() {
+  return List.generate(_col, (_) => List.generate(_row, (_) => 0));
 }
 
 // Main game class
@@ -60,7 +61,7 @@ class MyGame extends FlameGame {
 // World class where game logic happens
 class MyWorld extends World with TapCallbacks, DragCallbacks {
   // Initialize the grid
-  Grid grid = make2DArray(_gridDimension, _gridDimension);
+  Grid grid = make2DArray();
 
   // Component to render the grid
   late PixelGrid _pixelGrid;
@@ -76,12 +77,18 @@ class MyWorld extends World with TapCallbacks, DragCallbacks {
 
   // Set a cell to 1 when tapped or dragged (drop sand)
   void simulateSand(Vector2 gridPos) {
-    final x = (gridPos.x / _pixelSize).round();
-    final y = (gridPos.y / _pixelSize).round();
+    final matrix = 3;
+    final extent = (matrix / 2).round();
 
-    // Check bounds and set cell to sand (1)
-    if (x >= 0 && x < _gridDimension && y >= 0 && y < _gridDimension) {
-      grid[x][y] = 1;
+    for (var i = -extent; i <= extent; i++) {
+      for (var j = -extent; j < extent; j++) {
+        final x = ((gridPos.x / _pixelSize).round() + i);
+        final y = ((gridPos.y / _pixelSize).round() + j);
+        // Check bounds and set cell to sand (1)
+        if (x >= 0 && x < _col && y >= 0 && y < _row) {
+          grid[x][y] = hueValue;
+        }
+      }
     }
   }
 
@@ -99,13 +106,15 @@ class MyWorld extends World with TapCallbacks, DragCallbacks {
     simulateSand(event.localStartPosition);
   }
 
+  int hueValue = 100;
+
   // Called every frame to update the grid (simulate gravity)
   @override
   void update(double dt) {
     super.update(dt);
 
     // Create a copy of the current grid
-    Grid newGrid = make2DArray(_gridDimension, _gridDimension);
+    Grid newGrid = make2DArray();
     for (var i = 0; i < grid.length; i++) {
       for (var j = 0; j < grid[i].length; j++) {
         newGrid[i][j] = grid[i][j];
@@ -125,23 +134,32 @@ class MyWorld extends World with TapCallbacks, DragCallbacks {
 
             if (below < 1) {
               // Move sand down
-              newGrid[i][j + 1] = 1;
+              newGrid[i][j + 1] = state;
               newGrid[i][j] = 0;
             } else if ((i + 1) < grid.length && (i - 1) > 0) {
               // Try diagonally left and right
               final canRight = grid[i + 1][j + 1] < 1;
               final canLeft = grid[i - 1][j + 1] < 1;
 
-              if (canRight) {
-                newGrid[i + 1][j + 1] = 1;
+              // If can go to both left and right, pick random side
+              if (canRight && canLeft) {
+                if (Random().nextBool()) {
+                  newGrid[i + 1][j + 1] = state;
+                  newGrid[i][j] = 0;
+                } else {
+                  newGrid[i - 1][j + 1] = state;
+                  newGrid[i][j] = 0;
+                }
+              } else if (canRight) {
+                newGrid[i + 1][j + 1] = state;
                 newGrid[i][j] = 0;
               } else if (canLeft) {
-                newGrid[i - 1][j + 1] = 1;
+                newGrid[i - 1][j + 1] = state;
                 newGrid[i][j] = 0;
               }
             } else {
               // If no move possible, keep it as is
-              newGrid[i][j] = 1;
+              newGrid[i][j] = state;
             }
           }
         }
@@ -153,6 +171,11 @@ class MyWorld extends World with TapCallbacks, DragCallbacks {
 
     // Tell visual component to re-render with updated data
     _pixelGrid.updateGrid(grid);
+
+    hueValue += 1;
+    if (hueValue >= 360) {
+      hueValue = 1;
+    }
   }
 }
 
@@ -174,7 +197,14 @@ class PixelGrid extends Component {
     for (var x = 0; x < grid.length; x++) {
       for (var y = 0; y < grid[x].length; y++) {
         final paint = Paint()
-          ..color = grid[x][y] > 0 ? Colors.blue : Colors.white // Blue = sand, White = empty
+          ..color = grid[x][y] > 0
+              ? HSVColor.fromAHSV(
+                  1.0,
+                  (grid[x][y]).toDouble(),
+                  1.0,
+                  1.0,
+                ).toColor()
+              : Colors.white
           ..isAntiAlias = false;
 
         canvas.drawRect(
