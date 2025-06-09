@@ -19,6 +19,10 @@ A simple **grid-based sand physics simulator** built with Flutter using the [Fla
 
 
 
+https://github.com/user-attachments/assets/2499fecc-6c0c-494d-8aee-df49b6fe902b
+
+
+
 ---
 
 ## 🚀 Getting Started
