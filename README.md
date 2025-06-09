@@ -1,16 +1,29 @@
-# sand_sim_flt
+# 🟡 Flutter Sand Simulator
 
-A new Flutter project.
+A simple **grid-based sand physics simulator** built with Flutter using the [Flame](https://pub.dev/packages/flame) game engine. This project simulates falling sand using basic rules and renders it on a pixel grid, with unique hue-based colors for each pixel, creating a beautiful and colorful effect.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🧪 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 📦 Built with the Flame package (v1.17+)
+- 🧲 Grid-based sand physics (not particle/vector based)
+- 🎨 Colorful pixel rendering using HSV color logic based on grid position
+- 🎮 Interactive tapping and dragging to drop sand
+- 📐 Renders a **100×100 grid** of **4×4 pixels** (400×400 px canvas)
+- ⚡ Real-time updates and smooth rendering
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📸 Screenshots
+
+
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK (v3.0+)
+- Dart SDK
